@@ -15,6 +15,7 @@ def createHardwareSet(hw_name, total_quantity):
 
 def queryHardwareSet(hw_name):
     hardware = hardware_collection.find_one({'hw_name': hw_name})
+    hardware['_id'] = str(hardware['_id'])
     return hardware if hardware else {'status': 'error', 'message': 'Hardware not found'}
 
 def updateAvailability(hw_name, quantity):

@@ -20,6 +20,7 @@ def createProject(project_name, description):
 def getProjectInfo(project_id):
     project = projects_collection.find_one({'_id': project_id})
     if project:
+        project['_id'] = str(project['_id'])
         return {'status': 'success', 'project': project}
     else:
         return {'status': 'error', 'message': 'Project not found'}

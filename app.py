@@ -41,6 +41,9 @@ def join_project():
     user_id = data.get('user_id')
     project_id = data.get('project_id')
     return jsonify(joinProject(user_id, project_id))
+    # user logged in must also join the project
+    # get user projects ( from that get project id)
+    # user exists in project on multiple requests
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -82,7 +85,7 @@ def check_out():
     project_id = data.get('project_id')
     hw_name = data.get('hw_name')
     quantity = data.get('quantity')
-    return jsonify(checkOutHW(user_id, project_id, hw_name, quantity))
+    return jsonify(checkOutHW(user_id, ObjectId(project_id), hw_name, quantity))
 
 @app.route('/check_in', methods=['POST'])
 def check_in():
@@ -91,7 +94,7 @@ def check_in():
     project_id = data.get('project_id')
     hw_name = data.get('hw_name')
     quantity = data.get('quantity')
-    return jsonify(checkInHW(user_id, project_id, hw_name, quantity))
+    return jsonify(checkInHW(user_id, ObjectId(project_id), hw_name, quantity))
 
 @app.route('/create_hardware_set', methods=['POST'])
 def create_hardware_set():
