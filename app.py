@@ -1,8 +1,6 @@
-
-
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
-from bson import ObjectId
+from flask import make_response
 
 # Database Initialization
 client = MongoClient('localhost', 27017)
@@ -13,7 +11,7 @@ users_collection = db['users']
 
 # Ensure indexes are created
 hardware_collection.create_index('hw_name', unique=True)
-projects_collection.create_index('project_name', unique=True)
+projects_collection.create_index('project_id', unique=True)  # Index on project_id
 users_collection.create_index('user_id', unique=True)
 
 # Import database functions
@@ -29,7 +27,12 @@ def handle_login():
     data = request.json
     user_id = data.get('user_id')
     password = data.get('password')
-    return jsonify(login(user_id, password))
+    result = login(user_id, password)
+    if result.get("success"):
+        return jsonify(result), 200
+    else:
+        return jsonify({"error": result.get("message")}), 403
+
 
 @app.route('/main', methods=['GET'])
 def main_portal():
@@ -40,17 +43,21 @@ def join_project():
     data = request.json
     user_id = data.get('user_id')
     project_id = data.get('project_id')
+    if not user_id or not project_id:
+        return jsonify({"error": "Missing user_id or project_id"}), 400
     return jsonify(joinProject(user_id, project_id))
-    # user logged in must also join the project
-    # get user projects ( from that get project id)
-    # user exists in project on multiple requests
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
     data = request.json
     user_id = data.get('user_id')
     password = data.get('password')
-    return jsonify(addUser(user_id, password))
+
+    if not user_id or not password:
+        return jsonify({"error": "Missing user_id or password"}), 400
+
+    result, status_code = addUser(user_id, password)
+    return jsonify(result), status_code
 
 @app.route('/get_user_projects_list', methods=['GET'])
 def get_user_projects_list():
@@ -60,14 +67,18 @@ def get_user_projects_list():
 @app.route('/create_project', methods=['POST'])
 def create_project():
     data = request.json
+    project_id = data.get('project_id')
     project_name = data.get('project_name')
     description = data.get('description')
-    return jsonify(createProject(project_name, description))
+    if not project_id or not project_name or not description:
+        return jsonify({"error": "Missing project_id, project_name, or description"}), 400
+    result, status_code = createProject(project_id, project_name, description)
+    return jsonify(result), status_code
 
 @app.route('/get_project_info', methods=['GET'])
 def get_project_info():
     project_id = request.args.get('project_id')
-    return jsonify(getProjectInfo(ObjectId(project_id)))
+    return jsonify(getProjectInfo(project_id))
 
 @app.route('/get_all_hw_names', methods=['GET'])
 def get_all_hw_names():
@@ -78,6 +89,15 @@ def get_hw_info():
     hw_name = request.args.get('hw_name')
     return jsonify(queryHardwareSet(hw_name))
 
+# @app.route('/check_out', methods=['POST'])
+# def check_out():
+#     data = request.json
+#     user_id = data.get('user_id')
+#     project_id = data.get('project_id')
+#     hw_name = data.get('hw_name')
+#     quantity = data.get('quantity')
+#     return jsonify(checkOutHW(user_id, project_id, hw_name, quantity))
+
 @app.route('/check_out', methods=['POST'])
 def check_out():
     data = request.json
@@ -85,7 +105,12 @@ def check_out():
     project_id = data.get('project_id')
     hw_name = data.get('hw_name')
     quantity = data.get('quantity')
-    return jsonify(checkOutHW(user_id, ObjectId(project_id), hw_name, quantity))
+
+    if not all([user_id, project_id, hw_name, quantity]):
+        return jsonify({"error": "Missing parameters"}), 400
+
+    result, status_code = checkOutHW(user_id, project_id, hw_name, quantity)
+    return jsonify(result), status_code
 
 @app.route('/check_in', methods=['POST'])
 def check_in():
@@ -94,7 +119,22 @@ def check_in():
     project_id = data.get('project_id')
     hw_name = data.get('hw_name')
     quantity = data.get('quantity')
-    return jsonify(checkInHW(user_id, ObjectId(project_id), hw_name, quantity))
+
+    if not all([user_id, project_id, hw_name, quantity]):
+        return jsonify({"error": "Missing parameters"}), 400
+
+    result, status_code = checkInHW(user_id, project_id, hw_name, quantity)
+    return jsonify(result), status_code
+
+
+# @app.route('/check_in', methods=['POST'])
+# def check_in():
+#     data = request.json
+#     user_id = data.get('user_id')
+#     project_id = data.get('project_id')
+#     hw_name = data.get('hw_name')
+#     quantity = data.get('quantity')
+#     return jsonify(checkInHW(user_id, project_id, hw_name, quantity))
 
 @app.route('/create_hardware_set', methods=['POST'])
 def create_hardware_set():
