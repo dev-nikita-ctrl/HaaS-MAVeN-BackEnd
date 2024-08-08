@@ -24,7 +24,7 @@ def addUser(user_id, password):
 def login(user_id, password):
     user = users_collection.find_one({"user_id": user_id})
     if user and check_password_hash(user['password'], password):
-        return {"success": True, "message": "Login successful", "user_id": user_id}
+        return {"success": True, "message": "Login successful", "user_id": user_id, "status": "success"}
     else:
         return {"success": False, "message": "Incorrect username or password"}
 
