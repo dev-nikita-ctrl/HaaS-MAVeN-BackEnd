@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask import make_response
+from flask_cors import CORS
 
 # Database Initialization
 client = MongoClient('localhost', 27017)
@@ -20,6 +21,7 @@ from projectsDB import createProject, getProjectInfo, getAllHwNames, checkOutHW,
 from hardwareDB import createHardwareSet, queryHardwareSet, updateAvailability, requestSpace
 
 app = Flask(__name__)
+CORS(app)
 
 # Routes
 @app.route('/login', methods=['POST'])
