@@ -1,6 +1,10 @@
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
 
-client = MongoClient('localhost', 27017)
+load_dotenv()
+mongo_uri = os.getenv('MONGO_URI')
+client = MongoClient(mongo_uri)
 db = client['haas_system']
 hardware_collection = db['hardware']
 

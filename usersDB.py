@@ -1,8 +1,13 @@
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+mongo_uri = os.getenv('MONGO_URI')
 
 # Database Initialization
-client = MongoClient('localhost', 27017)
+client = MongoClient(mongo_uri)
 db = client['haas_system']
 users_collection = db['users']
 projects_collection = db['projects']
