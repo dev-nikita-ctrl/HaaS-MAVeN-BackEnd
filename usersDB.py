@@ -28,6 +28,7 @@ def login(user_id, password):
     else:
         return {"success": False, "message": "Incorrect username or password"}
 
+
 def joinProject(user_id, project_id):
     project = projects_collection.find_one({'project_id': project_id})
     if project:

@@ -22,6 +22,7 @@ def createProject(project_id, project_name, description):
     return {'status': 'success', 'message': 'Project created successfully'}, 201
 
 
+
 def getProjectInfo(project_id):
     project = projects_collection.find_one({'project_id': project_id})
     if project:
@@ -29,6 +30,7 @@ def getProjectInfo(project_id):
         return {'status': 'success', 'project': project}
     else:
         return {'status': 'error', 'message': 'Project not found'}
+    
 
 def getAllHwNames():
     hardware_names = hardware_collection.distinct('hw_name')

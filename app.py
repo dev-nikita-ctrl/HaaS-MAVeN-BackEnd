@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
-from flask import make_response
 from flask_cors import CORS
 
 # Database Initialization
@@ -40,14 +39,24 @@ def handle_login():
 def main_portal():
     return "Welcome to the Main Portal"
 
+
 @app.route('/join_project', methods=['POST'])
 def join_project():
     data = request.json
     user_id = data.get('user_id')
     project_id = data.get('project_id')
+
     if not user_id or not project_id:
-        return jsonify({"error": "Missing user_id or project_id"}), 400
-    return jsonify(joinProject(user_id, project_id))
+        return jsonify({"error": "Missing user_id or project_id"}), 400  # Return HTTP 400 Bad Request
+
+    response = joinProject(user_id, project_id)
+    
+    if response['status'] == 'success':
+        return jsonify(response), 200  # Return HTTP 200 OK
+    elif response['status'] == 'error':
+        return jsonify(response), 404  # Return HTTP 404 Not Found
+    else:
+        return jsonify({'status': 'error', 'message': 'Internal Server Error'}), 500  # Return HTTP 500 Internal Server Error
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -77,10 +86,18 @@ def create_project():
     result, status_code = createProject(project_id, project_name, description)
     return jsonify(result), status_code
 
+
 @app.route('/get_project_info', methods=['GET'])
 def get_project_info():
     project_id = request.args.get('project_id')
-    return jsonify(getProjectInfo(project_id))
+    response = getProjectInfo(project_id)
+    
+    if response['status'] == 'success':
+        return jsonify(response), 200  # Return HTTP 200 OK
+    elif response['status'] == 'error':
+        return jsonify(response), 404  # Return HTTP 404 Not Found
+    else:
+        return jsonify({'status': 'error', 'message': 'Internal Server Error'}), 500  # Return HTTP 500 Internal Server Error
 
 @app.route('/get_all_hw_names', methods=['GET'])
 def get_all_hw_names():
@@ -91,14 +108,6 @@ def get_hw_info():
     hw_name = request.args.get('hw_name')
     return jsonify(queryHardwareSet(hw_name))
 
-# @app.route('/check_out', methods=['POST'])
-# def check_out():
-#     data = request.json
-#     user_id = data.get('user_id')
-#     project_id = data.get('project_id')
-#     hw_name = data.get('hw_name')
-#     quantity = data.get('quantity')
-#     return jsonify(checkOutHW(user_id, project_id, hw_name, quantity))
 
 @app.route('/check_out', methods=['POST'])
 def check_out():
@@ -129,14 +138,6 @@ def check_in():
     return jsonify(result), status_code
 
 
-# @app.route('/check_in', methods=['POST'])
-# def check_in():
-#     data = request.json
-#     user_id = data.get('user_id')
-#     project_id = data.get('project_id')
-#     hw_name = data.get('hw_name')
-#     quantity = data.get('quantity')
-#     return jsonify(checkInHW(user_id, project_id, hw_name, quantity))
 
 @app.route('/create_hardware_set', methods=['POST'])
 def create_hardware_set():
